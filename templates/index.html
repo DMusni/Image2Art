@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask App</title>
+    <!--Load Dropzone and style it-->
+    {{ dropzone.load_css() }}
+    {{ dropzone.style('border: 2px dashed #0087F7; margin: 10%; min-height: 400px') }}
+</head>
+<body>
+    <h1>Hello from Flask!</h1>
+    <!--Create form and declare the action of the form which is viewing the styled dropzone in index-->
+    {{ dropzone.create(action='index')}}
+    {{ dropzone.load_js() }}
+    {{ dropzone.config() }}
+</body>
+</html>
