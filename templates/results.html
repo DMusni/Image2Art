@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Results</title>
+
+    <style>
+    .slidecontainer{
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+    }
+    </style>
+
+
 </head>
 <body>
     <h1>Hello Results</h1>
@@ -15,5 +26,22 @@
         <li> <img style="height: 300px" src ="{{ file_url}}"></li>
     {% endfor %}
     </ul>
+
+    <div class="slidecontainer">
+        <input type="range" min="2" max="50" value="25" class="slider" id="mySlider">
+        <p>Number of Color Groups: <span id="clusterNum"></span></p>
+    </div>
+
+
+    <script>
+        var slider = document.getElementById("mySlider");
+        var number = document.getElementById("clusterNum");
+        number.innerHTML = slider.value;
+
+        slider.oninput = function() {
+            number.innerHTML = this.value;
+        }
+    </script>
+
 </body>
 </html>
