@@ -8,6 +8,11 @@ from skimage import io
 import matplotlib.pyplot as plt
 
 # pip install Flask-Reuploaded
+# pip install flask-uploads flask-dropzone
+# pip install matplotlib
+# pip install scikit-learn
+# pip install opencv-python
+# pip install scikit-image
 
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_dropzone import Dropzone
@@ -72,12 +77,14 @@ def kmeans_smooth_clusters(image, n_clusters, min_size, filename, outline):
         name = secure_filename("outlined_"+filename)
         filepath = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], secure_filename("outlined_"+filename))
         cv2.imwrite(filepath, cv2.cvtColor(outlined_image, cv2.COLOR_RGB2BGR))
+      
         return name
     
     # Save the segmented image using OpenCV (cv2.imwrite)
     name = secure_filename("segmented_"+filename)
     filepath = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], secure_filename("segmented_"+filename))
     cv2.imwrite(filepath, cv2.cvtColor(smoothed_image, cv2.COLOR_RGB2BGR))
+   
     return name
 
 @app.route("/", methods=['GET', 'POST']) #index route allows post and get requests
