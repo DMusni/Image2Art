@@ -22,8 +22,8 @@
     <p><a href="{{ url_for('index') }}">Back</a></p> 
 
     <ul style="list-style-type: none; text-align: center;">
-    {% for file_url in file_urls %}
-        <li> <img style="height: 300px" src ="{{ file_url}}"></li>
+    {% for image in image_names %}
+        <li> <img style="height: 300px" src ="{{ url_for('static', filename='uploads/' + image) }}"></li>
     {% endfor %}
     </ul>
 
