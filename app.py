@@ -33,7 +33,7 @@ photos = UploadSet('photos', IMAGES) #collection of images (.jpg, .jpe, .jpeg, .
 configure_uploads(app, photos)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
 
-def kmeans_smooth_clusters(image, n_clusters, min_size, filename):
+def kmeans_smooth_clusters(image, n_clusters, min_size, filename, outline):
     # Reshape the image to a 2D array of pixels
     pixels = image.reshape(-1, image.shape[2])
 
@@ -58,6 +58,22 @@ def kmeans_smooth_clusters(image, n_clusters, min_size, filename):
     for cluster_label in range(n_clusters):
         smoothed_image[segmented_image == cluster_label] = centers[cluster_label]
 
+    smoothed_image = smoothed_image.astype(np.uint8)
+    
+    if outline:
+        outlined_image = smoothed_image.copy()
+        for cluster_label in range(len(centers)):
+            mask = (segmented_image == cluster_label).astype(np.uint8)
+            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            cv2.drawContours(outlined_image, contours, -1, (0, 255, 0), 1) #last param is line thickness
+
+        outlined_image = outlined_image.astype(np.uint8)
+        # Save the segmented image using OpenCV (cv2.imwrite)
+        name = secure_filename("outlined_"+filename)
+        filepath = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], secure_filename("outlined_"+filename))
+        cv2.imwrite(filepath, cv2.cvtColor(outlined_image, cv2.COLOR_RGB2BGR))
+        return name
+    
     # Save the segmented image using OpenCV (cv2.imwrite)
     name = secure_filename("segmented_"+filename)
     filepath = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], secure_filename("segmented_"+filename))
@@ -86,9 +102,12 @@ def index():
             min_size   = 100  # Minimum size of connected component
             
             # Apply KMeans with smoothing
-            segmented_image_name = kmeans_smooth_clusters(image, n_clusters, min_size, file.filename)
-
+            segmented_image_name = kmeans_smooth_clusters(image, n_clusters, min_size, file.filename, outline=False)
             image_names.append(segmented_image_name)
+
+            # Apply outlines
+            outlined_image_name = kmeans_smooth_clusters(image, n_clusters, min_size, file.filename, outline=True)
+            image_names.append(outlined_image_name)
         
         session['image_names'] = image_names
         return "uploading..."
