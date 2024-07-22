@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flask App</title>
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css" />
     <!--Load Dropzone and style it-->
     {{ dropzone.load_css() }}
-    {{ dropzone.style('border: 2px dashed #0087F7; margin: 10%; min-height: 400px') }}
+    {{ dropzone.style('border: 2px dashed #0087F7; margin-top: 5%; margin-bottom: 5%; margin-left: 10%; margin-right: 10%; min-height: 400px') }}
 
     <style>
         .slidecontainer{
@@ -18,6 +19,18 @@
     </style>
 </head>
 <body>
+    {% if image_names %}
+    <div class="results">
+        <h2>Results</h2>
+        <div class="images">
+            <ul style="list-style-type: none; text-align: center;">
+                {% for image in image_names %}
+                    <li> <img style="height: 300px" src ="{{ url_for('static', filename='uploads/' + image) }}"></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% else %}
     <h1 style="text-align:center">Upload Your Image</h1>
     <!-- Create form and declare the action of the form which is viewing the styled dropzone in index -->
     <form action="{{ url_for('index') }}" class="dropzone" id="myDropzone" enctype="multipart/form-data">
@@ -37,7 +50,7 @@
     <div style="text-align:center; margin-top: 20px;">
         <button id="submit-all">Submit</button>
     </div>
-
+    {% endif %}
 
     <script>
         var slider = document.getElementById("mySlider");
@@ -61,9 +74,9 @@
                     myDropzone.processQueue();
                 });
 
-                // Event listener for successful uploads
-                this.on("queuecomplete", function() {
-                    window.location.href = "{{ url_for('results') }}"; //redirect to results URL which renders results.html
+                // Force refresh after successful upload
+                myDropzone.on("success", function(file, response) {
+                    location.reload();
                 });
             }
         };

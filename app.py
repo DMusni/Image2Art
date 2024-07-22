@@ -32,7 +32,7 @@ csrf = CSRFProtect(app)
 app.config['DROPZONE_UPLOAD_MULTIPLE'] = True #send multiple files in one request 
 app.config['DROPZONE_ALLOWED_FILE_CUSTOM'] = True
 app.config['DROPZONE_ALLOWED_FILE_TYPE'] = 'image/*'
-app.config['DROPZONE_REDIRECT_VIEW'] = 'results' #after successful upload we get directed to results route that we create
+#app.config['DROPZONE_REDIRECT_VIEW'] = 'results' #after successful upload we get directed to results route that we create
 app.config['DROPZONE_AUTO_PROCESS_QUEUE'] = False #disable automatic redirection
 
 # Uploads settings
@@ -102,16 +102,16 @@ def index():
     #set session for image results
     if "image_names" not in session:
         session['image_names'] = [] 
-    #list to hold our uploaded image urls
-    image_names = session['image_names']
+   
 
     #handling image upload from Dropzone
     if request.method == 'POST': 
-
         if form.validate_on_submit():
             n_clusters = int(request.form['n_clusters']) #Get slider value from the from
             file_obj = request.files  #grab data from uploaded files 
             for f in file_obj: #iterate through to get individual uploads since we're allowing to upload multiple files
+                #list to hold our uploaded image urls
+                image_names = session['image_names']
                 file = request.files.get(f)
                 file.filename = secure_filename(file.filename).lower() #convert file extension type to lowercase
                 
@@ -122,22 +122,13 @@ def index():
                 # Apply KMeans and add all of the resulting images
                 segmented_image_names = kmeans_ultra(image, n_clusters, min_size, file.filename)
                 for name in segmented_image_names: image_names.append(name)
-            
-            session['image_names'] = image_names
-            return "uploading..."
-    return render_template("index.html", form=form)
+                session['image_names'] = image_names
 
-@app.route("/results")
-def results():
-    #redirect to home if no images to display
-    if "image_names" not in session or session['image_names'] == []:
-        return redirect(url_for('index'))
+           
+    return render_template("index.html", form=form, image_names=session['image_names'])
+
+#session.pop('image_names', None)
     
-    #set file_urls and remove the session variable 
-    image_names = session['image_names']
-    session.pop('image_names', None)
-    
-    return render_template("results.html", image_names=image_names)
 
 if __name__ == '__main__':
     app.run(debug=True)
