@@ -8,11 +8,6 @@ from skimage import io
 import matplotlib.pyplot as plt
 
 # pip install Flask-Reuploaded
-# pip install flask-uploads flask-dropzone
-# pip install matplotlib
-# pip install scikit-learn
-# pip install opencv-python
-# pip install scikit-image
 
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_dropzone import Dropzone
@@ -38,7 +33,7 @@ photos = UploadSet('photos', IMAGES) #collection of images (.jpg, .jpe, .jpeg, .
 configure_uploads(app, photos)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
 
-def kmeans_smooth_clusters(image, n_clusters, min_size, filename, outline):
+def kmeans_ultra(image, n_clusters, min_size, filename):
     # Reshape the image to a 2D array of pixels
     pixels = image.reshape(-1, image.shape[2])
 
@@ -65,27 +60,28 @@ def kmeans_smooth_clusters(image, n_clusters, min_size, filename, outline):
 
     smoothed_image = smoothed_image.astype(np.uint8)
     
-    if outline:
-        outlined_image = smoothed_image.copy()
-        for cluster_label in range(len(centers)):
-            mask = (segmented_image == cluster_label).astype(np.uint8)
-            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            cv2.drawContours(outlined_image, contours, -1, (0, 255, 0), 1) #last param is line thickness
+    # Save the outlined and segmented images using OpenCV (cv2.imwrite)
+    names = []
+    names.append(save_image("segmented", filename, smoothed_image))
+    names.append(outline_image(smoothed_image, segmented_image, filename, "outlined", centers, white_background=False))
+    names.append(outline_image(smoothed_image, segmented_image, filename, "outlined_white_bg", centers, white_background=True))
+    return names
 
-        outlined_image = outlined_image.astype(np.uint8)
-        # Save the segmented image using OpenCV (cv2.imwrite)
-        name = secure_filename("outlined_"+filename)
-        filepath = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], secure_filename("outlined_"+filename))
-        cv2.imwrite(filepath, cv2.cvtColor(outlined_image, cv2.COLOR_RGB2BGR))
-      
-        return name
-    
-    # Save the segmented image using OpenCV (cv2.imwrite)
-    name = secure_filename("segmented_"+filename)
-    filepath = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], secure_filename("segmented_"+filename))
-    cv2.imwrite(filepath, cv2.cvtColor(smoothed_image, cv2.COLOR_RGB2BGR))
-   
-    return name
+def outline_image(template_image, mask_image, filename, desired_name, centers, white_background):
+    if white_background : new_image = np.ones_like(template_image) * 255
+    else :                new_image = template_image.copy()
+    for cluster_label in range(len(centers)):
+            mask = (mask_image == cluster_label).astype(np.uint8)
+            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            cv2.drawContours(new_image, contours, -1, (0, 255, 0), 1) #last param is line thickness
+    new_image = new_image.astype(np.uint8)
+    return save_image(desired_name, filename, new_image)
+
+def save_image(desired_name, filename, image):
+    new_name = secure_filename(desired_name + "_" + filename)
+    filepath = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], new_name)
+    cv2.imwrite(filepath, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+    return new_name
 
 @app.route("/", methods=['GET', 'POST']) #index route allows post and get requests
 def index(): 
@@ -108,13 +104,9 @@ def index():
             n_clusters = 30
             min_size   = 100  # Minimum size of connected component
             
-            # Apply KMeans with smoothing
-            segmented_image_name = kmeans_smooth_clusters(image, n_clusters, min_size, file.filename, outline=False)
-            image_names.append(segmented_image_name)
-
-            # Apply outlines
-            outlined_image_name = kmeans_smooth_clusters(image, n_clusters, min_size, file.filename, outline=True)
-            image_names.append(outlined_image_name)
+            # Apply KMeans and add all of the resulting images
+            segmented_image_names = kmeans_ultra(image, n_clusters, min_size, file.filename)
+            for name in segmented_image_names: image_names.append(name)
         
         session['image_names'] = image_names
         return "uploading..."
