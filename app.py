@@ -7,29 +7,36 @@ from skimage import morphology
 from skimage import io
 import matplotlib.pyplot as plt
 
-# pip install Flask-Reuploaded
-# pip install flask-uploads flask-dropzone
-# pip install matplotlib
-# pip install scikit-learn
-# pip install opencv-python
-# pip install scikit-image
+
+# pip or pip3 install Flask-Reuploaded
+# pip or pip3 install flask-uploads flask-dropzone
+# pip or pip3 install matplotlib
+# pip or pip3 install scikit-learn
+# pip or pip3 install opencv-python
+# pip or pip3 install scikit-image
+# pip or pip3 install flask_wtf wtforms
 
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_dropzone import Dropzone
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 from werkzeug.utils import secure_filename
+from flask_wtf import FlaskForm, CSRFProtect
+from wtforms import FileField, SubmitField
+
 
 app = Flask(__name__)
 dropzone = Dropzone(app)
 
 #key needed when using sessions: allows us to store info specific to a user from one request to the next
 app.config['SECRET_KEY'] = 'supersecretkey'
+csrf = CSRFProtect(app)
 
 # Dropzone settings 
 app.config['DROPZONE_UPLOAD_MULTIPLE'] = True #send multiple files in one request 
 app.config['DROPZONE_ALLOWED_FILE_CUSTOM'] = True
 app.config['DROPZONE_ALLOWED_FILE_TYPE'] = 'image/*'
 app.config['DROPZONE_REDIRECT_VIEW'] = 'results' #after successful upload we get directed to results route that we create
+app.config['DROPZONE_AUTO_PROCESS_QUEUE'] = False #disable automatic redirection
 
 # Uploads settings
 basedir = os.path.abspath(os.path.dirname(__file__)) #our abs route directory
@@ -37,6 +44,9 @@ app.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'static/uploads') #sa
 photos = UploadSet('photos', IMAGES) #collection of images (.jpg, .jpe, .jpeg, .png, .gif, .svg, and .bmp)
 configure_uploads(app, photos)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
+
+class UploadForm(FlaskForm):
+    pass
 
 def kmeans_smooth_clusters(image, n_clusters, min_size, filename, outline):
     # Reshape the image to a 2D array of pixels
@@ -89,6 +99,7 @@ def kmeans_smooth_clusters(image, n_clusters, min_size, filename, outline):
 
 @app.route("/", methods=['GET', 'POST']) #index route allows post and get requests
 def index(): 
+    form = UploadForm() #create form
 
     #set session for image results
     if "image_names" not in session:
@@ -98,27 +109,28 @@ def index():
 
     #handling image upload from Dropzone
     if request.method == 'POST': 
-        file_obj = request.files  #grab data from uploaded files 
-        for f in file_obj: #iterate through to get individual uploads since we're allowing to upload multiple files
-            file = request.files.get(f)
-            file.filename = secure_filename(file.filename).lower() #convert file extension type to lowercase
-            
-            image = io.imread(file.stream)
-            # Set parameters
-            n_clusters = 30
-            min_size   = 100  # Minimum size of connected component
-            
-            # Apply KMeans with smoothing
-            segmented_image_name = kmeans_smooth_clusters(image, n_clusters, min_size, file.filename, outline=False)
-            image_names.append(segmented_image_name)
+        if form.validate_on_submit():
+            n_clusters = int(request.form['n_clusters']) #Get slider value from the from
+            file_obj = request.files  #grab data from uploaded files 
+            for f in file_obj: #iterate through to get individual uploads since we're allowing to upload multiple files
+                file = request.files.get(f)
+                file.filename = secure_filename(file.filename).lower() #convert file extension type to lowercase
+                
+                image = io.imread(file.stream)
+                # Set parameters
+                min_size   = 100  # Minimum size of connected component
+                
+                # Apply KMeans with smoothing
+                segmented_image_name = kmeans_smooth_clusters(image, n_clusters, min_size, file.filename, outline=False)
+                image_names.append(segmented_image_name)
 
-            # Apply outlines
-            outlined_image_name = kmeans_smooth_clusters(image, n_clusters, min_size, file.filename, outline=True)
-            image_names.append(outlined_image_name)
-        
-        session['image_names'] = image_names
-        return "uploading..."
-    return render_template("index.html")
+                # Apply outlines
+                outlined_image_name = kmeans_smooth_clusters(image, n_clusters, min_size, file.filename, outline=True)
+                image_names.append(outlined_image_name)
+            
+            session['image_names'] = image_names
+            return "uploading..."
+    return render_template("index.html", form=form)
 
 @app.route("/results")
 def results():

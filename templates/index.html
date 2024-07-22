@@ -19,26 +19,54 @@
 </head>
 <body>
     <h1 style="text-align:center">Upload Your Image</h1>
-    <!--Create form and declare the action of the form which is viewing the styled dropzone in index-->
-    {{ dropzone.create(action='index')}}
+    <!-- Create form and declare the action of the form which is viewing the styled dropzone in index -->
+    <form action="{{ url_for('index') }}" class="dropzone" id="myDropzone" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <!-- Hidden input to store the slider value -->
+        <input type="hidden" name="n_clusters" id="n_clusters" value="10">
+    </form>
     <!--Renders the configuration and shows text: "Drop files here or click to upload"-->
     {{ dropzone.load_js() }}
     {{ dropzone.config() }}
 
     <div class="slidecontainer">
-        <input type="range" min="2" max="50" value="25" class="slider" id="mySlider">
         <p>Number of Color Groups: <span id="clusterNum"></span></p>
+        <input type="range" min="2" max="20" value="10" class="slider" id="mySlider">
+    </div>
+
+    <div style="text-align:center; margin-top: 20px;">
+        <button id="submit-all">Submit</button>
     </div>
 
 
     <script>
         var slider = document.getElementById("mySlider");
         var number = document.getElementById("clusterNum");
+        var n_clusters = document.getElementById("n_clusters");
         number.innerHTML = slider.value;
 
         slider.oninput = function() {
             number.innerHTML = this.value;
+            n_clusters.value = this.value;
         }
+
+        // Dropzone configuration
+        Dropzone.options.myDropzone = {
+            autoProcessQueue: false,
+            init: function() {
+                var myDropzone = this;
+
+                // Bind button click event to process the Dropzone queue
+                document.getElementById("submit-all").addEventListener("click", function() {
+                    myDropzone.processQueue();
+                });
+
+                // Event listener for successful uploads
+                this.on("queuecomplete", function() {
+                    window.location.href = "{{ url_for('results') }}"; //redirect to results URL which renders results.html
+                });
+            }
+        };
     </script>
 
 </body>
