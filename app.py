@@ -127,7 +127,23 @@ def index():
            
     return render_template("index.html", form=form, image_names=session['image_names'])
 
-#session.pop('image_names', None)
+@app.route("/clear_session", methods=['POST'])
+@csrf.exempt  # Exempt CSRF protection for this route
+def clear_session():
+    session.pop('image_names', None)
+    
+    # Clear uploaded files in static/uploads directory
+    uploads_dir = app.config['UPLOADED_PHOTOS_DEST']
+    for filename in os.listdir(uploads_dir):
+        file_path = os.path.join(uploads_dir, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+        except Exception as e:
+            print(f"Failed to delete {file_path}. Reason: {e}")
+
+    return redirect(url_for('index'))
+    
     
 
 if __name__ == '__main__':
