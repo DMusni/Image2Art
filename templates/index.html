@@ -9,29 +9,21 @@
     {{ dropzone.load_css() }}
     {{ dropzone.style('border: 2px dashed #0087F7; margin-top: 5%; margin-bottom: 5%; margin-left: 10%; margin-right: 10%; min-height: 400px') }}
 
-    <style>
-        .slidecontainer{
-            display: flex;
-            width: 100%;
-            flex-direction: column;
-            align-items: center;
-        }
-    </style>
 </head>
 <body>
     {% if image_names %}
     <div class="results">
         <h2>Results</h2>
         <div class="images">
-            <ul style="list-style-type: none; text-align: center;">
+            <ul> 
                 {% for image in image_names %}
-                    <li> <img style="height: 300px" src ="{{ url_for('static', filename='uploads/' + image) }}"></li>
+                    <li> <img src ="{{ url_for('static', filename='uploads/' + image) }}"></li>
                 {% endfor %}
             </ul>
         </div>
     </div>
     {% else %}
-    <h1 style="text-align:center">Upload Your Image</h1>
+    <h1>Upload Your Image</h1>
     <!-- Create form and declare the action of the form which is viewing the styled dropzone in index -->
     <form action="{{ url_for('index') }}" class="dropzone" id="myDropzone" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
@@ -47,7 +39,7 @@
         <input type="range" min="2" max="20" value="10" class="slider" id="mySlider">
     </div>
 
-    <div style="text-align:center; margin-top: 20px;">
+    <div class="submit-button">
         <button id="submit-all">Submit</button>
     </div>
     {% endif %}

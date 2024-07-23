@@ -1,3 +1,34 @@
 body{
     background-color: aqua;
 }
+
+h1 {
+    text-align: center;
+}
+
+.slidecontainer{
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+}
+
+.images ul {
+    list-style-type: none;
+    text-align: center;
+}
+
+.images ul li {
+    display: block;
+    margin: 10px;
+}
+
+.images ul li img{
+    height: 300px;
+    object-fit: cover;
+}
+
+.submit-button{
+    text-align: center;
+    margin-top: 20px;
+}
