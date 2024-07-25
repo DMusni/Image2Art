@@ -13,17 +13,12 @@ h1 {
     align-items: center;
 }
 
-.images ul {
-    list-style-type: none;
+#img-container {
     text-align: center;
-}
-
-.images ul li {
-    display: block;
     margin: 10px;
 }
 
-.images ul li img{
+#uploaded-img{
     height: 300px;
     object-fit: cover;
 }
@@ -31,4 +26,14 @@ h1 {
 .submit-button{
     text-align: center;
     margin-top: 20px;
+}
+
+.btn-group button {
+    display: block;
+    cursor: pointer;
+    margin: 10px;
+    background-color: lightgray;
+    color: black;
+    border: 2px solid black;
+    padding: 10px 10px;
 }

@@ -13,7 +13,7 @@ from skimage import io
 # pip or pip3 install scikit-image
 # pip or pip3 install flask_wtf wtforms
 
-from flask import Flask, redirect, render_template, request, session, url_for
+from flask import Flask, redirect, render_template, request, session, url_for, jsonify
 from flask_dropzone import Dropzone
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 from werkzeug.utils import secure_filename

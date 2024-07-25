@@ -14,27 +14,31 @@
     {% if image_names %}
     <div class="results">
         <h2>Results</h2>
-        <div class="images">
-            <ul> 
-                {% for image in image_names %}
-                    <li> <img src ="{{ url_for('static', filename='uploads/' + image) }}"></li>
-                {% endfor %}
-            </ul>
+        <div class="images" id="img-container">
+            <img src ="{{ url_for('static', filename='uploads/' + image_names[2]) }}" id="uploaded-img">
         </div>
         <!-- Button to clear session and reload -->
         <form action="{{ url_for('clear_session') }}" method="POST">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
             <button type="submit">New Image</button>
         </form>
+        <div class="btn-group">
+            <button>Full Screen</button>
+            <button>Toggle Colors</button>
+            <button id="outlines">Toggle Lines</button>
+        </div>
     </div>
     {% else %}
     <h1>Upload Your Image</h1>
-    <!-- Create form and declare the action of the form which is viewing the styled dropzone in index -->
-    <form action="{{ url_for('index') }}" class="dropzone" id="myDropzone" enctype="multipart/form-data">
-        {{ form.hidden_tag() }}
-        <!-- Hidden input to store the slider value -->
-        <input type="hidden" name="n_clusters" id="n_clusters" value="10">
-    </form>
+
+    <div id="dropzone-container">
+        <!-- Create form and declare the action of the form which is viewing the styled dropzone in index -->
+        <form action="{{ url_for('index') }}" class="dropzone" id="myDropzone" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <!-- Hidden input to store the slider value -->
+            <input type="hidden" name="n_clusters" id="n_clusters" value="10">
+        </form>
+    </div>
     <!--Renders the configuration and shows text: "Drop files here or click to upload"-->
     {{ dropzone.load_js() }}
     {{ dropzone.config() }}
@@ -49,6 +53,7 @@
     </div>
     {% endif %}
 
+    {% block javascript %}
     <script>
         var slider = document.getElementById("mySlider");
         var number = document.getElementById("clusterNum");
@@ -75,9 +80,29 @@
                 myDropzone.on("success", function(file, response) {
                     location.reload();
                 });
+
             }
         };
+
+        let imgNames = JSON.parse('{{image_names | tojson }}');
+        let segmented = "{{ url_for('static', filename='uploads/') }}" + imgNames[0];
+        let coloredOutline = "{{ url_for('static', filename='uploads/') }}" + imgNames[1];
+        let whiteOutline = "{{ url_for('static', filename='uploads/') }}" + imgNames[2];
+
+        let currImg = segmented;
+        function toggleLines() {
+            let imgElement = document.getElementById("uploaded-img");
+            if(currImg === segmented) {
+                currImg = coloredOutline;
+            }
+            else {
+                currImg = segmented;
+            }
+            imgElement.src = currImg;
+        }
+
     </script>
+    {% endblock %}
 
 </body>
 </html>
