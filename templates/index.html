@@ -8,40 +8,37 @@
     <!--Load Dropzone and style it-->
     {{ dropzone.load_css() }}
     {{ dropzone.style('border: 2px dashed #0087F7; margin-top: 5%; margin-bottom: 5%; margin-left: 10%; margin-right: 10%; min-height: 400px') }}
-
 </head>
 <body>
-    {% if image_names %}
-    <div class="results">
-        <h2>Results</h2>
-        <div class="images" id="img-container">
-            <img src ="{{ url_for('static', filename='uploads/' + image_names[2]) }}" id="uploaded-img">
-        </div>
-        <!-- Button to clear session and reload -->
-        <form action="{{ url_for('clear_session') }}" method="POST">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-            <button type="submit">New Image</button>
-        </form>
-        <div class="btn-group">
-            <button>Full Screen</button>
-            <button>Toggle Colors</button>
-            <button id="outlines">Toggle Lines</button>
-        </div>
+    <div class="super-container">
+        {% if image_names %}
+            <h1>Results</h1>
+            <div class="images" id="img-container">
+                <img src ="{{ url_for('static', filename='uploads/' + image_names[0]) }}" id="uploaded-img">
+            </div>
+            <!-- Button to clear session and reload -->
+            <form action="{{ url_for('clear_session') }}" method="POST">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button type="submit">New Image</button>
+            </form>
+            <div class="btn-group">
+                <button id="full-screen">Full Screen</button>
+                <button id="colors">Toggle Colors</button>
+                <button id="outlines">Toggle Lines</button>
+            </div>
+        {% else %}
+            <h1>Upload Your Image</h1>
+            <!-- Create form and declare the action of the form which is viewing the styled dropzone in index -->
+            <form action="{{ url_for('index') }}" class="dropzone" id="myDropzone" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                <!-- Hidden input to store the slider value -->
+                <input type="hidden" name="n_clusters" id="n_clusters" value="10">
+            </form>
+            <!--Renders the configuration and shows text: "Drop files here or click to upload"-->
+            {{ dropzone.load_js() }}
+            {{ dropzone.config() }}
     </div>
-    {% else %}
-    <h1>Upload Your Image</h1>
-
-    <div id="dropzone-container">
-        <!-- Create form and declare the action of the form which is viewing the styled dropzone in index -->
-        <form action="{{ url_for('index') }}" class="dropzone" id="myDropzone" enctype="multipart/form-data">
-            {{ form.hidden_tag() }}
-            <!-- Hidden input to store the slider value -->
-            <input type="hidden" name="n_clusters" id="n_clusters" value="10">
-        </form>
-    </div>
-    <!--Renders the configuration and shows text: "Drop files here or click to upload"-->
-    {{ dropzone.load_js() }}
-    {{ dropzone.config() }}
+    {% endif %}
 
     <div class="slidecontainer">
         <p>Number of Color Groups: <span id="clusterNum"></span></p>
@@ -51,7 +48,6 @@
     <div class="submit-button">
         <button id="submit-all">Submit</button>
     </div>
-    {% endif %}
 
     {% block javascript %}
     <script>
@@ -64,43 +60,57 @@
             number.innerHTML = this.value;
             n_clusters.value = this.value;
         }
+        if ('{{ image_names | length }}' == 0){
+            // Dropzone configuration
+            Dropzone.options.myDropzone = {
+                autoProcessQueue: false,
+                init: function() {
+                    var myDropzone = this;
 
-        // Dropzone configuration
-        Dropzone.options.myDropzone = {
-            autoProcessQueue: false,
-            init: function() {
-                var myDropzone = this;
-
-                // Bind button click event to process the Dropzone queue
-                document.getElementById("submit-all").addEventListener("click", function() {
-                    myDropzone.processQueue();
-                });
-
-                // Force refresh after successful upload
-                myDropzone.on("success", function(file, response) {
-                    location.reload();
-                });
-
+                    // Bind button click event to process the Dropzone queue
+                    document.getElementById("submit-all").addEventListener("click", function() {
+                        myDropzone.processQueue();
+                    });
+                    // Force refresh after successful upload
+                    myDropzone.on("success", function(file, response) {
+                        location.reload();
+                    });
+                }
             }
-        };
+        } else {
+            let imgNames = JSON.parse('{{ image_names | tojson }}');
+            
+            // names of the images
+            let segmented       = imgNames[0];
+            let coloredOutline  = imgNames[1];
+            let whiteOutline    = imgNames[2];
 
-        let imgNames = JSON.parse('{{image_names | tojson }}');
-        let segmented = "{{ url_for('static', filename='uploads/') }}" + imgNames[0];
-        let coloredOutline = "{{ url_for('static', filename='uploads/') }}" + imgNames[1];
-        let whiteOutline = "{{ url_for('static', filename='uploads/') }}" + imgNames[2];
+            // entire source URLs
+            let segmentedSrc      = "{{ url_for('static', filename='uploads/') }}" + imgNames[0];
+            let coloredOutlineSrc = "{{ url_for('static', filename='uploads/') }}" + imgNames[1];
+            let whiteOutlineSrc   = "{{ url_for('static', filename='uploads/') }}" + imgNames[2];
+            
+            function toggleLines() {
+                let uploadedImg = document.getElementById("uploaded-img");
+                let currentSrc  = uploadedImg.src;
+    
+                     if (currentSrc.endsWith(segmented))         uploadedImg.src = coloredOutlineSrc;
+                else if (currentSrc.endsWith(coloredOutline))    uploadedImg.src = segmentedSrc;
+            };
+            function toggleColors() {
+                let uploadedImg = document.getElementById("uploaded-img");
+                let currentSrc  = uploadedImg.src;
+    
+                     if (currentSrc.endsWith(coloredOutline))    uploadedImg.src = whiteOutlineSrc;
+                else if (currentSrc.endsWith(whiteOutline))      uploadedImg.src = coloredOutlineSrc;
+            };
 
-        let currImg = segmented;
-        function toggleLines() {
-            let imgElement = document.getElementById("uploaded-img");
-            if(currImg === segmented) {
-                currImg = coloredOutline;
-            }
-            else {
-                currImg = segmented;
-            }
-            imgElement.src = currImg;
+            let outlinesButton = document.querySelector('#outlines');
+            let colorsButton = document.querySelector('#colors');
+
+            outlinesButton.addEventListener('click', () => toggleLines ());
+            colorsButton.addEventListener  ('click', () => toggleColors());
         }
-
     </script>
     {% endblock %}
 

@@ -106,6 +106,7 @@ def index():
 
     #handling image upload from Dropzone
     if request.method == 'POST': 
+        ensure_uploads_dir_exists()
         if form.validate_on_submit():
             n_clusters = int(request.form['n_clusters']) #Get slider value from the from
             file_obj = request.files  #grab data from uploaded files 
@@ -133,6 +134,7 @@ def clear_session():
     session.pop('image_names', None)
     
     # Clear uploaded files in static/uploads directory
+    ensure_uploads_dir_exists()
     uploads_dir = app.config['UPLOADED_PHOTOS_DEST']
     for filename in os.listdir(uploads_dir):
         file_path = os.path.join(uploads_dir, filename)
@@ -144,7 +146,10 @@ def clear_session():
 
     return redirect(url_for('index'))
     
-    
+def ensure_uploads_dir_exists():
+    uploads_dir = app.config['UPLOADED_PHOTOS_DEST']
+    if not os.path.exists(uploads_dir):
+        os.makedirs(uploads_dir)
 
 if __name__ == '__main__':
     app.run(debug=True)
