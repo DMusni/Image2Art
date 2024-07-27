@@ -3,7 +3,7 @@ body, html{
     height: 100%;
 }
 
-h1 {
+.title {
     text-align: center;
 }
 
@@ -14,15 +14,31 @@ h1 {
     align-items: center;
 }
 
-#img-container {
+.super-container{
+    display:flex;
+    justify-content:center;
+}
+#img-container, #dropzone-container {
+    place-self: center;
     text-align: center;
+    width: 700px;
+    height: 500px;
+}
+
+#img-container, #dropzone-container, .hex-container{
     margin: 10px;
+    background-color:slategray;
+    border:3px solid black;
+}
+#myDropzone{
+    border-color:aliceblue;
+    background-color:slategray;
 }
 
 #uploaded-img{
-    height: 300px;
     width: 100%;
-    object-fit: contain;
+    height: 100%;
+    object-fit: contain; /* Maintain aspect ratio and fit within the container */
 }
 
 .submit-button{
@@ -36,6 +52,10 @@ h1 {
     margin: 10px;
     background-color: lightgray;
     color: black;
-    border: 2px solid black;
+    border: 3px solid black;
     padding: 10px 10px;
+    width: 110px;
+}
+.hex-container {
+    width: 110px;
 }
