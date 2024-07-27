@@ -1,5 +1,6 @@
-body{
+body, html{
     background-color: aqua;
+    height: 100%;
 }
 
 h1 {
@@ -20,7 +21,8 @@ h1 {
 
 #uploaded-img{
     height: 300px;
-    object-fit: cover;
+    width: 100%;
+    object-fit: contain;
 }
 
 .submit-button{

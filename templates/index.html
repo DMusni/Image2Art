@@ -104,12 +104,25 @@
                      if (currentSrc.endsWith(coloredOutline))    uploadedImg.src = whiteOutlineSrc;
                 else if (currentSrc.endsWith(whiteOutline))      uploadedImg.src = coloredOutlineSrc;
             };
+            
+            let uploadedImg = document.getElementById("uploaded-img");
+            function fullScreen() {
+                if(uploadedImg.requestFullscreen) {
+                    uploadedImg.requestFullscreen();
+                } else if (euploadedImg.webkitRequestFullscreen) { // for different browsers
+                    uploadedImg.webkitRequestFullscreen();
+                } else if (uploadedImg.msRequestFullscreen) {
+                    uploadedImg.msRequestFullscreen();
+                }
+            }
 
             let outlinesButton = document.querySelector('#outlines');
             let colorsButton = document.querySelector('#colors');
+            let fullScreenButton = document.querySelector('#full-screen');
 
             outlinesButton.addEventListener('click', () => toggleLines ());
             colorsButton.addEventListener  ('click', () => toggleColors());
+            fullScreenButton.addEventListener('click', () => fullScreen());
         }
     </script>
     {% endblock %}
