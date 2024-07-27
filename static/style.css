@@ -5,6 +5,17 @@ body, html{
 
 .title {
     text-align: center;
+    display:grid;
+    justify-content: center;
+}
+#img2art{
+    margin-top:10px;
+    font-size:40px;
+    margin-bottom:12px;
+}
+#subtext {
+    width: 700px;
+    margin-bottom:15px;
 }
 
 .slidecontainer{
@@ -13,10 +24,15 @@ body, html{
     flex-direction: column;
     align-items: center;
 }
+#cluster-text{
+    margin:0px;
+    padding-bottom:5px;
+}
 
 .super-container{
     display:flex;
     justify-content:center;
+    margin-top:-10px;
 }
 #img-container, #dropzone-container {
     place-self: center;
@@ -43,7 +59,7 @@ body, html{
 
 .submit-button{
     text-align: center;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .btn-group button {
