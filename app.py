@@ -72,7 +72,7 @@ def kmeans_ultra(image, n_clusters, min_size, filename):
     smoothed_image = smoothed_image.astype(np.uint8)
 
     hex_values = []
-    for i, center in enumerate(kmeans.cluster_centers_):
+    for center in enumerate(kmeans.cluster_centers_):
         hex_value = '#{:02x}{:02x}{:02x}'.format(int(center[0]), int(center[1]), int(center[2]))
         hex_values.append(hex_value)
     
