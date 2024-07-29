@@ -72,6 +72,48 @@ body, html{
     padding: 10px 10px;
     width: 110px;
 }
+
 .hex-container {
+    display: grid;
+    column-gap: 5px;
+    list-style-type: none;
     width: 110px;
+    padding-left: 9px;
+}
+#No-Color {
+    display: flex; /* Use flexbox to align items inline */
+    align-items: center; /* Center align items vertically */
+    gap: 20px; /* Space between items, adjust as needed */
+    margin-bottom: 0px; /* Space below the No-Color section */
+    padding: 0; /* Remove padding if needed */
+}
+
+#No-Color h5 {
+    margin: 0; /* Remove default margin from h5 elements */
+    padding: 0; /* Remove padding if needed */
+    text-decoration: underline; /* Apply underline style */
+}
+
+.hex-entry {
+    display: flex;
+    align-items: center; /* Center align items vertically */
+    padding:0px;
+}
+
+.hex-number {
+    margin-right: 10px; /* Space between number and color */
+    width: 20px;
+}
+
+.color {
+    display: flex;
+    align-items: center; /* Align color boxes vertically */
+    width: 100%; /* Ensure color section takes up full width of .hex-entry */
+    column-gap: 5px;
+}
+
+.hex-color {
+    width: 16px;
+    height: 16px;
+    border: 1px solid black; /* Optional: border around color boxes */
 }
