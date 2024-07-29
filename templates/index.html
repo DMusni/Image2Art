@@ -29,7 +29,7 @@
                 </form>
             </div>
             <div class="images" id="img-container">
-                <img src ="{{ url_for('static', filename='uploads/' + image_names[0]) }}" id="uploaded-img">
+                <img src ="{{ url_for('static', filename='uploads/' + image_names[1]) }}" id="uploaded-img">
             </div>
             <div class="hex-container"></div>
         {% else %}
@@ -47,14 +47,24 @@
         {% endif %}
     </div>
 
+    
     <div class="slidecontainer">
         <p id="cluster-text">Number of Color Groups: <span id="clusterNum"></span></p>
-        <input type="range" min="2" max="20" value="10" class="slider" id="mySlider">
+        <input type="range" min="2" max="20" value="10" class="slider" id="mySlider" name="n_clusters">
     </div>
+    {% if not image_names %}
+        <div class="submit-button">
+            <button id="submit-all">Submit</button>
+        </div>
+    {% else %}
+        <div class="reprocess-button">
+            <button id="reprocess">Reprocess</button>
+        </div>
+    {% endif %}
+   
 
-    <div class="submit-button">
-        <button id="submit-all">Submit</button>
-    </div>
+
+  
 
     {% block javascript %}
     <script>
@@ -67,6 +77,8 @@
             number.innerHTML = this.value;
             n_clusters.value = this.value;
         }
+        
+        
         if ('{{ image_names | length }}' == 0){
             // Dropzone configuration
             Dropzone.options.myDropzone = {
@@ -74,13 +86,13 @@
                 init: function() {
                     var myDropzone = this;
 
-                    // Bind button click event to process the Dropzone queue
-                    document.getElementById("submit-all").addEventListener("click", function() {
-                        myDropzone.processQueue();
-                    });
                     // Force refresh after successful upload
                     myDropzone.on("success", function(file, response) {
                         location.reload();
+                    });
+
+                    document.getElementById("submit-all").addEventListener("click", function() {
+                        myDropzone.processQueue();
                     });
                 }
             }
@@ -131,6 +143,8 @@
             colorsButton.addEventListener  ('click', () => toggleColors());
             fullScreenButton.addEventListener('click', () => fullScreen());
         }
+
+
     </script>
     {% endblock %}
 

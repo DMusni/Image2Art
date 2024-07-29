@@ -102,8 +102,8 @@ def index():
     #set session for image results
     if "image_names" not in session:
         session['image_names'] = [] 
+        session['original_image'] = ""
    
-
     #handling image upload from Dropzone
     if request.method == 'POST': 
         ensure_uploads_dir_exists()
@@ -125,13 +125,16 @@ def index():
                 for name in segmented_image_names: image_names.append(name)
                 session['image_names'] = image_names
 
-           
+                # Store the original image filename separately
+                session['original_image'] = file.filename
+
     return render_template("index.html", form=form, image_names=session['image_names'])
 
 @app.route("/clear_session", methods=['POST'])
 @csrf.exempt  # Exempt CSRF protection for this route
 def clear_session():
     session.pop('image_names', None)
+    session.pop('original_image', None)
     
     # Clear uploaded files in static/uploads directory
     ensure_uploads_dir_exists()
@@ -150,6 +153,7 @@ def ensure_uploads_dir_exists():
     uploads_dir = app.config['UPLOADED_PHOTOS_DEST']
     if not os.path.exists(uploads_dir):
         os.makedirs(uploads_dir)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
