@@ -75,14 +75,11 @@ body, html{
     width: 110px;
 }
 
-<<<<<<< HEAD
 .btn-group button:disabled {
     opacity: 0.6;
     cursor: not-allowed; /* Change cursor to indicate it's not clickable */
 }
 
-=======
->>>>>>> origin/hex
 .hex-container {
     display: grid;
     column-gap: 5px;

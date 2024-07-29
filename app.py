@@ -72,8 +72,13 @@ def kmeans_ultra(image, n_clusters, min_size, filename):
     smoothed_image = smoothed_image.astype(np.uint8)
 
     hex_values = []
-    for center in enumerate(kmeans.cluster_centers_):
-        hex_value = '#{:02x}{:02x}{:02x}'.format(int(center[0]), int(center[1]), int(center[2]))
+    for center in kmeans.cluster_centers_:
+    # center is now a single cluster center array
+        hex_value = '#{:02x}{:02x}{:02x}'.format(
+            int(center[0]),
+            int(center[1]),
+            int(center[2])
+        )
         hex_values.append(hex_value)
     
     # Save the outlined and segmented images using OpenCV (cv2.imwrite)
@@ -106,7 +111,6 @@ def index():
     #set session for image results
     if "image_names" not in session:
         session['image_names'] = [] 
-        session['original_image'] = ""
     
     if "hex_values" not in session:
         session['hex_values'] = []
