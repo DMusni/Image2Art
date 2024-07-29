@@ -32,7 +32,6 @@ csrf = CSRFProtect(app)
 app.config['DROPZONE_UPLOAD_MULTIPLE'] = True #send multiple files in one request 
 app.config['DROPZONE_ALLOWED_FILE_CUSTOM'] = True
 app.config['DROPZONE_ALLOWED_FILE_TYPE'] = 'image/*'
-#app.config['DROPZONE_REDIRECT_VIEW'] = 'results' #after successful upload we get directed to results route that we create
 app.config['DROPZONE_AUTO_PROCESS_QUEUE'] = False #disable automatic redirection
 
 # Uploads settings
@@ -71,13 +70,18 @@ def kmeans_ultra(image, n_clusters, min_size, filename):
         smoothed_image[segmented_image == cluster_label] = centers[cluster_label]
 
     smoothed_image = smoothed_image.astype(np.uint8)
+
+    hex_values = []
+    for center in enumerate(kmeans.cluster_centers_):
+        hex_value = '#{:02x}{:02x}{:02x}'.format(int(center[0]), int(center[1]), int(center[2]))
+        hex_values.append(hex_value)
     
     # Save the outlined and segmented images using OpenCV (cv2.imwrite)
     names = []
     names.append(save_image("segmented", filename, smoothed_image))
     names.append(outline_image(smoothed_image, segmented_image, filename, "outlined", centers, white_background=False))
     names.append(outline_image(smoothed_image, segmented_image, filename, "outlined_white_bg", centers, white_background=True))
-    return names
+    return names, hex_values
 
 def outline_image(template_image, mask_image, filename, desired_name, centers, white_background):
     if white_background : new_image = np.ones_like(template_image) * 255
@@ -103,6 +107,9 @@ def index():
     if "image_names" not in session:
         session['image_names'] = [] 
         session['original_image'] = ""
+    
+    if "hex_values" not in session:
+        session['hex_values'] = []
    
     #handling image upload from Dropzone
     if request.method == 'POST': 
@@ -121,20 +128,18 @@ def index():
                 min_size   = 100  # Minimum size of connected component
                 
                 # Apply KMeans and add all of the resulting images
-                segmented_image_names = kmeans_ultra(image, n_clusters, min_size, file.filename)
+                segmented_image_names, hex_vals = kmeans_ultra(image, n_clusters, min_size, file.filename)
                 for name in segmented_image_names: image_names.append(name)
                 session['image_names'] = image_names
-
-                # Store the original image filename separately
-                session['original_image'] = file.filename
-
-    return render_template("index.html", form=form, image_names=session['image_names'])
+                session['hex_values']  = hex_vals
+    
+    return render_template("index.html", form=form, image_names=session['image_names'], hex_values=session['hex_values'])
 
 @app.route("/clear_session", methods=['POST'])
 @csrf.exempt  # Exempt CSRF protection for this route
 def clear_session():
     session.pop('image_names', None)
-    session.pop('original_image', None)
+    session.pop('hex_values' , None)
     
     # Clear uploaded files in static/uploads directory
     ensure_uploads_dir_exists()

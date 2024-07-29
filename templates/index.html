@@ -31,7 +31,20 @@
             <div class="images" id="img-container">
                 <img src ="{{ url_for('static', filename='uploads/' + image_names[1]) }}" id="uploaded-img">
             </div>
-            <div class="hex-container"></div>
+            <div class="hex-container">
+                <div id="No-Color">
+                    <h5>No</h5><h5>Color</h5>
+                </div>
+                {% for hex_code in hex_values %}
+                <li class="hex-entry">
+                    <div class="hex-number">{{ loop.index }}</div>
+                    <div class="color">
+                        <div class="hex-color" style="background-color: {{ hex_code }};"></div>
+                        <div class="hex-code">{{ hex_code }}</div>
+                    </div>
+                </li>
+                {% endfor %}
+            </div>
         {% else %}
             <div id="dropzone-container">
                 <!-- Create form and declare the action of the form which is viewing the styled dropzone in index -->
