@@ -62,8 +62,6 @@
         </div>
     {% endif %}
    
-
-
   
 
     {% block javascript %}
@@ -111,18 +109,35 @@
             
             function toggleLines() {
                 let uploadedImg = document.getElementById("uploaded-img");
-                let currentSrc  = uploadedImg.src;
-    
-                     if (currentSrc.endsWith(segmented))         uploadedImg.src = coloredOutlineSrc;
-                else if (currentSrc.endsWith(coloredOutline))    uploadedImg.src = segmentedSrc;
-            };
+                let currentSrc = uploadedImg.src;
+
+                let segmentedSrc = "{{ url_for('static', filename='uploads/') }}" + segmented;
+                let coloredOutlineSrc = "{{ url_for('static', filename='uploads/') }}" + coloredOutline;
+
+                if (currentSrc.endsWith(segmentedSrc)) {
+                    uploadedImg.src = coloredOutlineSrc;
+                } else if (currentSrc.endsWith(coloredOutlineSrc)) {
+                    uploadedImg.src = segmentedSrc;
+                }
+                // Call updateButtonStates to update the button states
+                updateButtonStates();
+            }
+
             function toggleColors() {
                 let uploadedImg = document.getElementById("uploaded-img");
-                let currentSrc  = uploadedImg.src;
-    
-                     if (currentSrc.endsWith(coloredOutline))    uploadedImg.src = whiteOutlineSrc;
-                else if (currentSrc.endsWith(whiteOutline))      uploadedImg.src = coloredOutlineSrc;
-            };
+                let currentSrc = uploadedImg.src;
+
+                let coloredOutlineSrc = "{{ url_for('static', filename='uploads/') }}" + coloredOutline;
+                let whiteOutlineSrc = "{{ url_for('static', filename='uploads/') }}" + whiteOutline;
+
+                if (currentSrc.endsWith(coloredOutlineSrc)) {
+                    uploadedImg.src = whiteOutlineSrc;
+                } else if (currentSrc.endsWith(whiteOutlineSrc)) {
+                    uploadedImg.src = coloredOutlineSrc;
+                }
+                // Call updateButtonStates to update the button states
+                updateButtonStates();
+            }
             
             let uploadedImg = document.getElementById("uploaded-img");
             function fullScreen() {
@@ -139,11 +154,51 @@
             let colorsButton = document.querySelector('#colors');
             let fullScreenButton = document.querySelector('#full-screen');
 
-            outlinesButton.addEventListener('click', () => toggleLines ());
-            colorsButton.addEventListener  ('click', () => toggleColors());
             fullScreenButton.addEventListener('click', () => fullScreen());
-        }
+            document.querySelector('#outlines').addEventListener('click', () => {
+                if (!document.querySelector('#outlines').disabled) {
+                    toggleLines();
+                }
+            });
 
+            document.querySelector('#colors').addEventListener('click', () => {
+                if (!document.querySelector('#colors').disabled) {
+                    toggleColors();
+                }
+            });
+
+            // Initialize button states on page load
+            document.addEventListener('DOMContentLoaded', () => {
+                if ('{{ image_names | length }}' > 0) {
+                    updateButtonStates();
+                }
+            });
+
+            function updateButtonStates() {
+                let uploadedImg = document.getElementById("uploaded-img");
+                let currentSrc = uploadedImg.src;
+
+                let segmentedSrc = "{{ url_for('static', filename='uploads/') }}" + segmented;
+                let coloredOutlineSrc = "{{ url_for('static', filename='uploads/') }}" + coloredOutline;
+                let whiteOutlineSrc = "{{ url_for('static', filename='uploads/') }}" + whiteOutline;
+
+                // Update Lines Button
+                if (currentSrc.endsWith(segmentedSrc) || currentSrc.endsWith(coloredOutlineSrc)) {
+                    document.querySelector('#outlines').disabled = false;
+                } else {
+                    document.querySelector('#outlines').disabled = true;
+                }
+
+                // Update Colors Button
+                if (currentSrc.endsWith(coloredOutlineSrc) || currentSrc.endsWith(whiteOutlineSrc)) {
+                    document.querySelector('#colors').disabled = false;
+                } else {
+                    document.querySelector('#colors').disabled = true;
+                }
+            }
+
+
+        }
 
     </script>
     {% endblock %}

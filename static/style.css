@@ -75,6 +75,11 @@ body, html{
     width: 110px;
 }
 
+.btn-group button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed; /* Change cursor to indicate it's not clickable */
+}
+
 .hex-container {
     width: 110px;
 }
