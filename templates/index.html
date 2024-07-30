@@ -108,6 +108,19 @@
                 }
             }
         } else {
+            document.querySelector('#reprocess').addEventListener('click', function() {
+                var sliderValue = document.getElementById('mySlider').value;
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ url_for("reprocess_image") }}';
+                var hiddenField = document.createElement('input');
+                hiddenField.type = 'hidden';
+                hiddenField.name = 'n_clusters';
+                hiddenField.value = sliderValue;
+                form.appendChild(hiddenField);
+                document.body.appendChild(form);
+                form.submit();
+            });
             let imgNames = JSON.parse('{{ image_names | tojson }}');
             
             // names of the images
@@ -191,9 +204,9 @@
                 let uploadedImg = document.getElementById("uploaded-img");
                 let currentSrc = uploadedImg.src;
 
-                let segmentedSrc = "{{ url_for('static', filename='uploads/') }}" + segmented;
+                let segmentedSrc      = "{{ url_for('static', filename='uploads/') }}" + segmented;
                 let coloredOutlineSrc = "{{ url_for('static', filename='uploads/') }}" + coloredOutline;
-                let whiteOutlineSrc = "{{ url_for('static', filename='uploads/') }}" + whiteOutline;
+                let whiteOutlineSrc   = "{{ url_for('static', filename='uploads/') }}" + whiteOutline;
 
                 // Update Lines Button
                 if (currentSrc.endsWith(segmentedSrc) || currentSrc.endsWith(coloredOutlineSrc)) {
@@ -209,8 +222,6 @@
                     document.querySelector('#colors').disabled = true;
                 }
             }
-
-
         }
 
     </script>

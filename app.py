@@ -94,7 +94,7 @@ def outline_image(template_image, mask_image, filename, desired_name, centers, w
     for cluster_label in range(len(centers)):
             mask = (mask_image == cluster_label).astype(np.uint8)
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            cv2.drawContours(new_image, contours, -1, (0, 255, 0), 1) #last param is line thickness
+            cv2.drawContours(new_image, contours, -1, (0, 0, 0), 1) #last param is line thickness
     new_image = new_image.astype(np.uint8)
     return save_image(desired_name, filename, new_image)
 
@@ -114,6 +114,9 @@ def index():
     
     if "hex_values" not in session:
         session['hex_values'] = []
+    
+    if "original_image" not in session:
+        session['original_image'] = None
    
     #handling image upload from Dropzone
     if request.method == 'POST': 
@@ -126,16 +129,23 @@ def index():
                 image_names = session['image_names']
                 file = request.files.get(f)
                 file.filename = secure_filename(file.filename).lower() #convert file extension type to lowercase
-                
+
                 image = io.imread(file.stream)
-                # Set parameters
-                min_size   = 100  # Minimum size of connected component
                 
                 # Apply KMeans and add all of the resulting images
+                min_size   = 100  # Minimum size threshold of small holes
                 segmented_image_names, hex_vals = kmeans_ultra(image, n_clusters, min_size, file.filename)
                 for name in segmented_image_names: image_names.append(name)
                 session['image_names'] = image_names
                 session['hex_values']  = hex_vals
+                
+                # Save the original image properly
+                original_image_path = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], file.filename)
+                file.stream.seek(0)  # Reset the stream position to the beginning
+                with open(original_image_path, 'wb') as out_file:
+                    out_file.write(file.stream.read())
+
+                session['original_image'] = file.filename
     
     return render_template("index.html", form=form, image_names=session['image_names'], hex_values=session['hex_values'])
 
@@ -144,6 +154,7 @@ def index():
 def clear_session():
     session.pop('image_names', None)
     session.pop('hex_values' , None)
+    session.pop('original_image', None)
     
     # Clear uploaded files in static/uploads directory
     ensure_uploads_dir_exists()
@@ -157,7 +168,31 @@ def clear_session():
             print(f"Failed to delete {file_path}. Reason: {e}")
 
     return redirect(url_for('index'))
+
+@app.route("/reprocess_image", methods=['POST'])
+@csrf.exempt  # Exempt CSRF protection for this route
+def reprocess_image():
+    n_clusters = int(request.form['n_clusters'])
+    original_filename = session.get('original_image')
+    if original_filename is None:
+        print("{original_filename} doesnt exist")
+        return redirect(url_for('index'))
+
+    ensure_uploads_dir_exists()
+    file_path = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], secure_filename(original_filename))
+
+    image = io.imread(file_path)
+    min_size = 100
+
+    # Apply KMeans and add all of the resulting images
+    segmented_image_names, hex_vals = kmeans_ultra(image, n_clusters, min_size, original_filename)
     
+    # Update session
+    session['image_names'] = segmented_image_names
+    session['hex_values']  = hex_vals
+
+    return redirect(url_for('index'))
+
 def ensure_uploads_dir_exists():
     uploads_dir = app.config['UPLOADED_PHOTOS_DEST']
     if not os.path.exists(uploads_dir):
