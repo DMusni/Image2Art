@@ -23,6 +23,8 @@
                 <button id="colors">Toggle Colors</button>
                 <button id="outlines">Toggle Lines</button>
                 <button id="numbers">Toggle No.</button>
+                <button id="download" data-filename="{{ image_names[4] }}">Download</button>
+                <button id="print">Print</button>
                     <!-- Button to clear session and reload -->
                 <form action="{{ url_for('clear_session') }}" method="POST">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
@@ -208,6 +210,12 @@
             });
             numbersButton.addEventListener('click', () => {
                 if (!numbersButton.disabled) toggleNumbers();
+            });
+
+            // Download the current image displayed
+            document.getElementById('download').addEventListener('click', function() {
+                let filename = this.getAttribute('data-filename');
+                window.location.href = '/download/' + filename;
             });
 
             // Initialize button states on page load

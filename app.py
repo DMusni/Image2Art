@@ -21,6 +21,7 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES
 from werkzeug.utils import secure_filename
 from flask_wtf import FlaskForm, CSRFProtect
 from wtforms import FileField, SubmitField
+from flask import send_from_directory
 
 
 app = Flask(__name__)
@@ -311,6 +312,10 @@ def ensure_uploads_dir_exists():
     uploads_dir = app.config['UPLOADED_PHOTOS_DEST']
     if not os.path.exists(uploads_dir):
         os.makedirs(uploads_dir)
+
+@app.route('/download/<filename>')
+def download_file(filename):
+    return send_from_directory(app.config['UPLOADED_PHOTOS_DEST'], filename, as_attachment=True)
 
 
 if __name__ == '__main__':
