@@ -122,7 +122,7 @@ def kmeans_ultra(image, n_clusters, min_size, filename):
                 # Random sampling within the contour's bounding box
                 best_point = None
                 max_distance = -1
-                for _ in range(1000):  # Generate a large number of points
+                for _ in range(100):  # Generate a large number of points
                     test_x = random.randint(x_min, x_min + w - 1)
                     test_y = random.randint(y_min, y_min + h - 1)
                     
