@@ -313,9 +313,38 @@ def ensure_uploads_dir_exists():
     if not os.path.exists(uploads_dir):
         os.makedirs(uploads_dir)
 
-@app.route('/download/<filename>')
+
+#@app.route('/download/<filename>')
+#def download_file(filename):
+#    return send_from_directory(app.config['UPLOADED_PHOTOS_DEST'], filename, as_attachment=True)
+
+import zipfile
+
+@app.route("/download/<filename>")
 def download_file(filename):
-    return send_from_directory(app.config['UPLOADED_PHOTOS_DEST'], filename, as_attachment=True)
+    # Get the full path of the image file
+    image_path = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], filename)
+    
+    # Create a text file with hex codes
+    text_filename = 'hex_codes.txt'
+    hex_file_path = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], text_filename)
+    
+    with open(hex_file_path, 'w') as hex_file:
+        for i, hex_code in enumerate(session.get('hex_values', []), 1):
+            hex_file.write(f"{i}: {hex_code}\n")
+    
+    # Create a zip file that contains both the image and the text file
+    zip_filename = 'download.zip'
+    zip_file_path = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], zip_filename)
+    
+    with zipfile.ZipFile(zip_file_path, 'w') as zipf:
+        zipf.write(image_path, filename)
+        zipf.write(hex_file_path, text_filename)
+    
+    # Clean up the text file
+    os.remove(hex_file_path)
+    
+    return send_from_directory(app.config['UPLOADED_PHOTOS_DEST'], zip_filename, as_attachment=True)
 
 
 if __name__ == '__main__':
