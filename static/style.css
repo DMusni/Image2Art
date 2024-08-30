@@ -166,3 +166,19 @@ body, html{
     height: 16px;
     border: 1px solid black; /* Optional: border around color boxes */
 }
+
+@media print {
+    body {
+        margin: 20mm;
+        font-family: Arial, sans-serif;
+    }
+    
+    .btn-group,
+    .slidecontainer,
+    .submit-button,
+    .reprocess-button,
+    #dropzone-container,
+    #subtext {
+        display: none; /* Hide elements that are not needed in print */
+    }
+}

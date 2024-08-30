@@ -31,9 +31,11 @@
                     <button type="submit">New Image</button>
                 </form>
             </div>
+
             <div class="images" id="img-container">
                 <img src ="{{ url_for('static', filename='uploads/' + image_names[4]) }}" id="uploaded-img">
             </div>
+         
             <div class="hex-container">
                 <div id="No-Color">
                     <h5>No.</h5><h5>Color</h5>
@@ -216,6 +218,11 @@
             document.getElementById('download').addEventListener('click', function() {
                 let filename = this.getAttribute('data-filename');
                 window.location.href = '/download/' + filename;
+            });
+
+            //Print current image and hex codes
+            document.getElementById('print').addEventListener('click', function() {
+                window.print();
             });
 
             // Initialize button states on page load
